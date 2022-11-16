@@ -277,7 +277,7 @@ namespace netBpmIO
         const std::string& comment = "" ) {
 
         // ### ASCII header ###
-        FILE *fileFP = fopen( filePath.c_str(), "w" ); // write inverse sensor image to file
+        FILE *fileFP = fopen( filePath.c_str(), "w" ); // write image to file
         //fprintf(fileFP, "PF # spp = %d\n", spp);
         fprintf( fileFP, "%s\n", ( colorMode == ePfmColorMode::rgb ) ? "PF" : "Pf" );
         fprintf( fileFP, "%d %d\n", dimX, dimY );
