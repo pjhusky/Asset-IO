@@ -2,7 +2,7 @@
 #define _NETBPMIO_H_914c094e_61f3_4b57_ba38_80cba8f79b82
 
 #include "stringUtils.h"
-#include "statusType.h"
+#include "eRetVal_FileLoader.h"
 
 #include <cstdint>
 #include <iostream> 
@@ -13,6 +13,8 @@
 #include <regex>
 
 #include <cassert>
+
+using namespace FileLoader;
 
 namespace netBpmIO
 {
@@ -35,7 +37,7 @@ namespace netBpmIO
 #endif
 
     template< typename val_T >
-    static Status_t readPpm( 
+    static eRetVal readPpm( 
         const std::string& filePath, 
         std::vector< val_T >& pData, 
         int32_t& numSrcChannels,
@@ -89,7 +91,7 @@ namespace netBpmIO
             FILE* pFile = nullptr;
             //auto fopenErr = 
             fopen_s( &pFile, filePath.c_str(), "rb" );
-            if ( pFile == nullptr ) { return Status_t::ERROR(); }
+            if ( pFile == nullptr ) { return eRetVal::ERROR; }
 
             fseek( pFile, -imgByteSize, SEEK_END );
             pData.resize( imgNumEntries );
@@ -151,11 +153,11 @@ namespace netBpmIO
             printf( "ended PPM ascii read\n" );
         }
 
-        return Status_t::OK();
+        return eRetVal::OK;
     }
 
     template< typename val_T >
-    static Status_t writePpm( 
+    static eRetVal writePpm( 
         const std::string& filePath, 
         const val_T *const pData, 
         const int32_t numSrcChannels,
@@ -188,10 +190,10 @@ namespace netBpmIO
             }
         }
         fclose( pFile );
-        return Status_t::OK();
+        return eRetVal::OK;
     }
 
-    static Status_t readPfm( 
+    static eRetVal readPfm( 
         const std::string& filePath, 
         std::vector< float > &data, 
         int32_t& numSrcChannels,
@@ -234,7 +236,7 @@ namespace netBpmIO
             headerRegex );
         printf( "didRegexMatch = %s\n", didRegexMatch ? "yes" : "no" );
         assert( regexMatches.size() == 5 );
-        if ( regexMatches.size() != 5 ) { return Status_t::ERROR(); }
+        if ( regexMatches.size() != 5 ) { return eRetVal::ERROR; }
 
         if ( regexMatches[ 1 ] == "PF" ) { colorMode = ePfmColorMode::rgb; numSrcChannels = 3; }
         else if ( regexMatches[ 1 ] == "Pf" ) { colorMode = ePfmColorMode::gray; numSrcChannels = 1; }
@@ -248,7 +250,7 @@ namespace netBpmIO
         fileStream.close();
 
         FILE *pFile = fopen( filePath.c_str(), "rb" );
-        if ( fseek( pFile, -sizeof( float ) * data.size(), SEEK_END ) != 0 ) { return Status_t::ERROR(); }
+        if ( fseek( pFile, -sizeof( float ) * data.size(), SEEK_END ) != 0 ) { return eRetVal::ERROR; }
         fread( data.data(), sizeof( float ), data.size(), pFile );
         fclose( pFile );
 
@@ -263,10 +265,10 @@ namespace netBpmIO
         }
 
         printf( " - readPfm done\n" );
-        return ( didRegexMatch ? Status_t::OK() : Status_t::ERROR() );
+        return ( didRegexMatch ? eRetVal::OK : eRetVal::ERROR );
     }
 
-    static Status_t writePfm( 
+    static eRetVal writePfm( 
         const std::string& filePath, 
         const float *const pData, 
         const int32_t numSrcChannels, // will be 4 for an RGBA image, but will still be written to a 1-channel grayscale, or 3-channel rgb image, depending on 'colorMode'
@@ -310,7 +312,7 @@ namespace netBpmIO
             }
         }
         fclose( fileFP );
-        return Status_t::OK();
+        return eRetVal::OK;
     }
 }
 

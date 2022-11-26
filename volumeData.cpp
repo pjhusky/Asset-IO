@@ -1,12 +1,13 @@
 #include "volumeData.h"
 
-//#include <inttypes.h>
 #include <stdio.h>
 #include <assert.h>
 
 #include <omp.h>
 
-Status_t VolumeData::load( const std::string& fileUrl ) {
+using namespace FileLoader;
+
+eRetVal VolumeData::load( const std::string& fileUrl ) {
     //-- set number of threads
     omp_set_num_threads( 8 );
     #pragma omp parallel
@@ -17,7 +18,7 @@ Status_t VolumeData::load( const std::string& fileUrl ) {
 
     FILE* pFile = fopen( fileUrl.c_str(), "rb" );
     if (pFile == nullptr) { 
-        return Status_t::ERROR( "failed to open VolumeData file" ); 
+        return eRetVal::ERROR; //Status_t::ERROR( "failed to open VolumeData file" ); 
     }
 
     size_t elementsRead = 0;
@@ -40,9 +41,9 @@ Status_t VolumeData::load( const std::string& fileUrl ) {
     for ( int32_t densityIdx = 0; densityIdx < numDensityEntries; densityIdx++ ) {
         const auto& density = mDensities[densityIdx];
         if (density > 0) { // skip density 0 as minimum
-            mMinMaxDensity[0] = linAlg::minimum( mMinMaxDensity[0], density ); 
+            mMinMaxDensity[0] = std::min( mMinMaxDensity[0], density ); 
         }
-        mMinMaxDensity[1] = linAlg::maximum( mMinMaxDensity[1], density );
+        mMinMaxDensity[1] = std::max( mMinMaxDensity[1], density );
     }
     if (mMinMaxDensity[0] == mMinMaxDensity[1]) { mMinMaxDensity[0] = 0; }
     assert( mMinMaxDensity[1] <= std::numeric_limits<uint16_t>::max() );
@@ -56,7 +57,7 @@ Status_t VolumeData::load( const std::string& fileUrl ) {
     calculateNormals();
 #endif
 
-    return Status_t::OK();
+    return eRetVal::OK; //Status_t::OK();
 }
 
 void VolumeData::calculateNormals() {
@@ -65,7 +66,7 @@ void VolumeData::calculateNormals() {
         for (uint32_t y = 0; y < mDim[1]; y++) {
             for (uint32_t x = 0; x < mDim[0]; x++) {
                 // TODO!!!
-                mNormals[z * mDim[1] * mDim[0] + y * mDim[0] + x] = linAlg::vec3_t{ 0.0f, 1.0f, 0.0f };
+                mNormals[z * mDim[1] * mDim[0] + y * mDim[0] + x] = vec3_t{ 0.0f, 1.0f, 0.0f };
                 //mDensities[z * mDim[1] * mDim[0] + y * mDim[1] + x] = 15000;
                 //mDensities[z * mDim[1] * mDim[0] + y * mDim[0] + x] = 1.0f;
             }
@@ -75,7 +76,7 @@ void VolumeData::calculateNormals() {
 
 
 
-void VolumeData::getBoundingSphere( linAlg::vec4_t& boundingSphere ) {
+void VolumeData::getBoundingSphere( vec4_t& boundingSphere ) {
     const float hx = mDim[0] * 0.5f;
     const float hy = mDim[1] * 0.5f;
     const float hz = mDim[2] * 0.5f;

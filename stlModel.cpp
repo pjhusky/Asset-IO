@@ -1,7 +1,20 @@
 #include "stlModel.h"
 
 #include <iostream>
-#include <stl_reader/stl_reader.h>
+#include "stl_reader/stl_reader.h"
+
+using namespace FileLoader;
+
+namespace {
+    template<typename val_T, uint8_t num_T>
+    static val_T dot( const std::array<val_T, num_T>& v1, const std::array<val_T, num_T>& v2 ) {
+        val_T result = val_T( 0 );
+        for (uint8_t i = 0; i < num_T; i++) {
+            result += v1[i] * v2[i];
+        }
+        return result;
+    }
+}
 
 void StlModel::clear() {
     mNumStlIndices = 0;
@@ -14,11 +27,11 @@ void StlModel::clear() {
     mGfxNormals.clear();
     mGfxTriangleVertexIndices.clear();
 
-    mCenterAndRadius = linAlg::vec4_t{ 0.0f, 0.0f, 0.0f, 0.0f };
+    mCenterAndRadius = std::array<float, 4>{ 0.0f, 0.0f, 0.0f, 0.0f };
     mWasRadiusCalculated = false;
 }
 
-Status_t StlModel::load(const std::string& url)
+eRetVal StlModel::load(const std::string& url)
 {
     try {
         stl_reader::ReadStlFile(url.c_str(), mCoords, mNormals, mTriangleVertexIndices, mSolids);
@@ -27,7 +40,7 @@ Status_t StlModel::load(const std::string& url)
         std::cout << e.what() << std::endl;
     }
 
-    mCenterAndRadius = linAlg::vec4_t{ 0.0f, 0.0f, 0.0f, 0.0f };
+    mCenterAndRadius = std::array<float, 4>{ 0.0f, 0.0f, 0.0f, 0.0f };
     mWasRadiusCalculated = false;
 
     mGfxCoords.reserve(mTriangleVertexIndices.size());
@@ -68,15 +81,15 @@ Status_t StlModel::load(const std::string& url)
 
     getBoundingSphere(mCenterAndRadius);
     
-    return Status_t::OK();
+    return eRetVal::OK;//();
 }
 
-Status_t StlModel::save(const std::string& url, const std::string& comment)
+eRetVal StlModel::save(const std::string& url, const std::string& comment)
 {
-    return Status_t::ERROR("StlModel::save() is not implemented yet");
+    return eRetVal::ERROR; //("StlModel::save() is not implemented yet");
 }
 
-const void StlModel::getBoundingSphere(linAlg::vec4_t& centerAndRadius) const
+const void StlModel::getBoundingSphere(std::array<float, 4>& centerAndRadius) const
 {
     if (mWasRadiusCalculated) {
         centerAndRadius = mCenterAndRadius;
@@ -99,16 +112,23 @@ const void StlModel::getBoundingSphere(linAlg::vec4_t& centerAndRadius) const
     mCenterAndRadius[0] /= fNumCoords;
     mCenterAndRadius[1] /= fNumCoords;
     mCenterAndRadius[2] /= fNumCoords;
-    const linAlg::vec3_t sphereCenter{ mCenterAndRadius[0], mCenterAndRadius[1], mCenterAndRadius[2] };
+    const std::array<float, 3> sphereCenter{ mCenterAndRadius[0], mCenterAndRadius[1], mCenterAndRadius[2] };
     float maxLen = 0.0f;
 
     for (size_t itri = 0; itri < numTris; ++itri) {
         for (size_t icorner = 0; icorner < 3; ++icorner) {
             const float *const c = &mCoords[3 * mTriangleVertexIndices[3 * itri + icorner]];
-            linAlg::vec3_t coord{ c[0], c[1], c[2] };
-            linAlg::vec3_t vecToCenter;
-            linAlg::sub< linAlg::vec3_t >(vecToCenter, coord, sphereCenter);
-            maxLen = linAlg::maximum(maxLen, linAlg::dot(vecToCenter, vecToCenter));
+            std::array<float, 3> coord{ c[0], c[1], c[2] };
+            //std::array<float, 3> vecToCenter;
+            //linAlg::sub< std::array<float, 3> >(vecToCenter, coord, sphereCenter);
+            std::array<float, 3> vecToCenter{ 
+                coord[0] - sphereCenter[0],
+                coord[1] - sphereCenter[1],
+                coord[2] - sphereCenter[2],
+            };
+            //maxLen = linAlg::maximum(maxLen, linAlg::dot(vecToCenter, vecToCenter));
+            maxLen = std::max( maxLen, dot( vecToCenter, vecToCenter ) );
+            //maxLen = std::max( maxLen, vecToCenter[0] * vecToCenter[0] + vecToCenter[1] * vecToCenter[1] + vecToCenter[2] * vecToCenter[2] );
         }
     }
     mCenterAndRadius[3] = sqrtf(maxLen);

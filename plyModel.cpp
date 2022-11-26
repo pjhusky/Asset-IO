@@ -1,5 +1,4 @@
 #include "plyModel.h"
-#include "stringUtils.h"
 
 #include <fstream>
 #include <sstream>
@@ -10,6 +9,8 @@
 
 #include <cassert>
 
+using namespace FileLoader;
+
 namespace
 {
     enum class eEncoding {
@@ -17,6 +18,17 @@ namespace
         BINARY_BIG_ENDIAN,
         ASCII,
         UNKNOWN,
+    };
+
+    struct StringUtils {
+        template <typename val_T>
+        static val_T convStrTo( const std::string& str )
+        {
+            std::stringstream numStream{ str };
+            val_T             val;
+            numStream >> val;
+            return val;
+        }
     };
 
     static PlyModel::eDataType plyDataTypeStringToEnum( const std::string& strRep ) {
@@ -60,7 +72,7 @@ namespace
 
 } // namespace
 
-Status_t PlyModel::load( const std::string& url )
+eRetVal PlyModel::load( const std::string& url )
 {
 #if 1
     std::vector< char > charactersReadFromFile;
@@ -68,7 +80,7 @@ Status_t PlyModel::load( const std::string& url )
     FILE* pFile = nullptr;
     //auto fopenErr = 
     fopen_s( &pFile, url.c_str(), "r" );
-    if ( pFile == nullptr ) { return Status_t::ERROR(); }
+    if ( pFile == nullptr ) { return eRetVal::ERROR; }
     const std::string endHeaderLiteral{ "end_header" };
     const size_t endHeaderNumChars = endHeaderLiteral.size();
 
@@ -240,7 +252,7 @@ end_header)";
             const std::string elementBlockName          = ( elementHeaderSubMatches.begin() + 1 )->str();
             const std::string elementBlockNumEntriesStr = ( elementHeaderSubMatches.begin() + 2 )->str();
             //std::cout << "elementBlockName = " << elementBlockName << ", elementBlockNumEntriesStr = " << elementBlockNumEntriesStr << std::endl;
-            elementBlock_t elementBlockEntry{ stringUtils::convStrTo< size_t >( elementBlockNumEntriesStr ) };
+            elementBlock_t elementBlockEntry{ StringUtils::convStrTo< size_t >( elementBlockNumEntriesStr ) };
 
             const std::string propertyBlock = elementBlock[ 1 ].str();
             //std::cout << "*#) elementBlock ContentOnly:\n" << propertyBlock << std::endl;            
@@ -474,7 +486,7 @@ end_header)";
     }
 #endif
 
-    return Status_t::OK();
+    return eRetVal::OK;
 }
 
 const PlyModel::propertyDesc_t *const PlyModel::getPropertyByName( const std::string& propertyName, size_t& numElements ) const {
@@ -505,7 +517,7 @@ const PlyModel::propertyDesc_t *const PlyModel::getPropertyByName(
     return nullptr;
 }
 
-Status_t PlyModel::addProperty( 
+eRetVal PlyModel::addProperty( 
     const std::string& blockName, 
     const PlyModel::propertyDesc_t& propertyDesc ) {
     for ( auto& elementBlockDesc : mElementBlockDescriptions ) {
@@ -513,10 +525,10 @@ Status_t PlyModel::addProperty(
 
         elementBlockDesc.elementBlockData.propertyDescriptions.push_back( propertyDesc );
     }
-    return Status_t::OK();
+    return eRetVal::OK;
 }
 
-const void PlyModel::getBoundingSphere( linAlg::vec4_t& centerAndRadius ) const {
+const void PlyModel::getBoundingSphere( std::array<float, 4>& centerAndRadius ) const {
 
     if ( mWasRadiusCalculated ) {
         centerAndRadius = mCenterAndRadius;
@@ -547,14 +559,14 @@ const void PlyModel::getBoundingSphere( linAlg::vec4_t& centerAndRadius ) const 
     float maxZ = pZ[ 0 ];
 
     for ( size_t i = 1; i < numElementsX; i++ ) {
-        minX = linAlg::minimum( minX, pX[ i ] );
-        maxX = linAlg::maximum( maxX, pX[ i ] );
+        minX = std::min( minX, pX[ i ] );
+        maxX = std::max( maxX, pX[ i ] );
 
-        minY = linAlg::minimum( minY, pY[ i ] );
-        maxY = linAlg::maximum( maxY, pY[ i ] );
+        minY = std::min( minY, pY[ i ] );
+        maxY = std::max( maxY, pY[ i ] );
 
-        minZ = linAlg::minimum( minZ, pZ[ i ] );
-        maxZ = linAlg::maximum( maxZ, pZ[ i ] );
+        minZ = std::min( minZ, pZ[ i ] );
+        maxZ = std::max( maxZ, pZ[ i ] );
     }
 
     const float centerX = ( maxX + minX ) * 0.5f;
@@ -572,7 +584,7 @@ const void PlyModel::getBoundingSphere( linAlg::vec4_t& centerAndRadius ) const 
         const float dZ = centerZ - z;
 
         const float distSquared = dX * dX + dY * dY + dZ * dZ;
-        maxDistSquared = linAlg::maximum( maxDistSquared, distSquared );
+        maxDistSquared = std::max( maxDistSquared, distSquared );
     }
 
     centerAndRadius[ 0 ] = centerX;
@@ -584,7 +596,7 @@ const void PlyModel::getBoundingSphere( linAlg::vec4_t& centerAndRadius ) const 
     mCenterAndRadius = centerAndRadius;
 }
 
-Status_t PlyModel::save( const std::string& url, const std::string& comment ) {
+eRetVal PlyModel::save( const std::string& url, const std::string& comment ) {
 
     FILE* pFile = nullptr;
     //std::string filepath = url + ".okay.ply";
@@ -647,5 +659,5 @@ Status_t PlyModel::save( const std::string& url, const std::string& comment ) {
     fflush( pFile );
     fclose( pFile );
 
-    return Status_t::OK();
+    return eRetVal::OK;
 }
