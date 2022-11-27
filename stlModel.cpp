@@ -3,13 +3,18 @@
 #include <iostream>
 #include "stl_reader/stl_reader.h"
 
+#ifndef _USE_MATH_DEFINES
+    #define _USE_MATH_DEFINES
+#endif
+#include <math.h>
+
 using namespace FileLoader;
 
 namespace {
-    template<typename val_T, uint8_t num_T>
+    template<typename val_T, uint32_t num_T>
     static val_T dot( const std::array<val_T, num_T>& v1, const std::array<val_T, num_T>& v2 ) {
         val_T result = val_T( 0 );
-        for (uint8_t i = 0; i < num_T; i++) {
+        for (uint32_t i = 0; i < num_T; i++) {
             result += v1[i] * v2[i];
         }
         return result;
@@ -118,16 +123,16 @@ const void StlModel::getBoundingSphere(std::array<float, 4>& centerAndRadius) co
     for (size_t itri = 0; itri < numTris; ++itri) {
         for (size_t icorner = 0; icorner < 3; ++icorner) {
             const float *const c = &mCoords[3 * mTriangleVertexIndices[3 * itri + icorner]];
-            std::array<float, 3> coord{ c[0], c[1], c[2] };
+            std::array<float, uint32_t{3u}> coord{ c[0], c[1], c[2] };
             //std::array<float, 3> vecToCenter;
             //linAlg::sub< std::array<float, 3> >(vecToCenter, coord, sphereCenter);
-            std::array<float, 3> vecToCenter{ 
+            std::array<float, uint32_t{3u}> vecToCenter{ 
                 coord[0] - sphereCenter[0],
                 coord[1] - sphereCenter[1],
                 coord[2] - sphereCenter[2],
             };
             //maxLen = linAlg::maximum(maxLen, linAlg::dot(vecToCenter, vecToCenter));
-            maxLen = std::max( maxLen, dot( vecToCenter, vecToCenter ) );
+            maxLen = std::max( maxLen, dot<float, uint32_t{3u}>( vecToCenter, vecToCenter ) );
             //maxLen = std::max( maxLen, vecToCenter[0] * vecToCenter[0] + vecToCenter[1] * vecToCenter[1] + vecToCenter[2] * vecToCenter[2] );
         }
     }

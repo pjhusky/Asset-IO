@@ -2,8 +2,14 @@
 
 #include <stdio.h>
 #include <assert.h>
-
+#include <stdint.h>
+#include <limits.h>
 #include <omp.h>
+
+#ifndef _USE_MATH_DEFINES
+    #define _USE_MATH_DEFINES
+#endif
+#include <math.h>
 
 using namespace FileLoader;
 
