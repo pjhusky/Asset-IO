@@ -170,16 +170,16 @@ namespace FileLoader {
 
             if (storeBinary) {
                 fclose( pFile );
-                //pFile = fopen( filePath.c_str(), "ab" );
                 pFile = fopen( filePath.c_str(), "ab" );
-                //fseek( pFile, 0, SEEK_END );
-                //fwrite( pData, sizeof( uint8_t) * numSrcChannels, dimX * dimY, pFile ); // turned upside down
-                for (int32_t y = dimY - 1; y >= 0; y--) { // write line-by-line, flipping the y coord
+
+                //for (int32_t y = dimY - 1; y >= 0; y--) { // write line-by-line, flipping the y coord
+                for (int32_t y = 0; y < dimY; y++) {
                     fwrite( pData + y * dimX * numSrcChannels, sizeof( uint8_t ) * numSrcChannels, dimX, pFile );
                 }
             }
             else {
-                for (int32_t y = dimY - 1; y >= 0; y--) {
+                //for (int32_t y = dimY - 1; y >= 0; y--) {
+                for (int32_t y = 0; y < dimY; y++) {
                     for (int32_t x = 0; x < dimX; x++) {
                         int32_t i = (x + y * dimX) * numSrcChannels;
                         for (int32_t c = 0; c < numSrcChannels; c++) {
