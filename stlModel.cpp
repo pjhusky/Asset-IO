@@ -22,15 +22,10 @@ namespace {
 }
 
 void StlModel::clear() {
-    mNumStlIndices = 0;
     mCoords.clear();
     mNormals.clear();
     mTriangleVertexIndices.clear();
     mSolids.clear();
-
-    mGfxCoords.clear();
-    mGfxNormals.clear();
-    mGfxTriangleVertexIndices.clear();
 
     mCenterAndRadius = std::array<float, 4>{ 0.0f, 0.0f, 0.0f, 0.0f };
     mWasRadiusCalculated = false;
@@ -38,8 +33,9 @@ void StlModel::clear() {
 
 eRetVal StlModel::load(const std::string& url)
 {
+    std::vector<float> faceNormals;
     try {
-        stl_reader::ReadStlFile(url.c_str(), mCoords, mNormals, mTriangleVertexIndices, mSolids);
+        stl_reader::ReadStlFile(url.c_str(), mCoords, faceNormals, mTriangleVertexIndices, mSolids);
     }
     catch (std::exception& e) {
         std::cout << e.what() << std::endl;
@@ -48,42 +44,15 @@ eRetVal StlModel::load(const std::string& url)
     mCenterAndRadius = std::array<float, 4>{ 0.0f, 0.0f, 0.0f, 0.0f };
     mWasRadiusCalculated = false;
 
-    mGfxCoords.reserve(mTriangleVertexIndices.size());
-    mGfxNormals.reserve(mTriangleVertexIndices.size());
-    mGfxTriangleVertexIndices.reserve(mTriangleVertexIndices.size());
-    uint32_t gfxCurrIdx = 0;
-    const size_t numTris = mTriangleVertexIndices.size() / 3;
-    for (size_t itri = 0; itri < numTris; ++itri) {
-        //std::cout << "coordinates of triangle " << itri << ": ";
-        for (size_t icorner = 0; icorner < 3; ++icorner) {
-            const float *const c = &mCoords[3 * mTriangleVertexIndices[3 * itri + icorner]];
-            //std::cout << "(" << c[0] << ", " << c[1] << ", " << c[2] << ") ";
-            //mCenterAndRadius[0] += c[0];
-            //mCenterAndRadius[1] += c[1];
-            //mCenterAndRadius[2] += c[2];
-
-            mGfxCoords.push_back(c[0]);
-            mGfxCoords.push_back(c[1]);
-            mGfxCoords.push_back(c[2]);
-
-            float* n = &mNormals[3 * itri];
-            mGfxNormals.push_back(n[0]);
-            mGfxNormals.push_back(n[1]);
-            mGfxNormals.push_back(n[2]);
-
-            mGfxTriangleVertexIndices.push_back(gfxCurrIdx + 0);
-            mGfxTriangleVertexIndices.push_back(gfxCurrIdx + 1);
-            mGfxTriangleVertexIndices.push_back(gfxCurrIdx + 2);
-            gfxCurrIdx += 3;
-        }
-        //std::cout << std::endl;
-
-        //float* n = &mNormals[3 * itri];
-        //std::cout << "normal of triangle " << itri << ": " << "(" << n[0] << ", " << n[1] << ", " << n[2] << ")\n";
+    mNormals.resize( faceNormals.size() * sizeof( faceNormals[0] ) * 3 );
+    size_t idx = 0;
+    for (const auto& faceNormalCoord : faceNormals) {
+        mNormals[ ( idx + 0 ) * 3 ] = faceNormalCoord;
+        mNormals[ ( idx + 1 ) * 3 ] = faceNormalCoord;
+        mNormals[ ( idx + 2 ) * 3 ] = faceNormalCoord;
+        idx++;
     }
-
-    mNumStlIndices = mGfxTriangleVertexIndices.size();
-
+    
     getBoundingSphere(mCenterAndRadius);
     
     return eRetVal::OK;//();
@@ -124,21 +93,18 @@ const void StlModel::getBoundingSphere(std::array<float, 4>& centerAndRadius) co
         for (size_t icorner = 0; icorner < 3; ++icorner) {
             const float *const c = &mCoords[3 * mTriangleVertexIndices[3 * itri + icorner]];
             std::array<float, uint32_t{3u}> coord{ c[0], c[1], c[2] };
-            //std::array<float, 3> vecToCenter;
-            //linAlg::sub< std::array<float, 3> >(vecToCenter, coord, sphereCenter);
+
             std::array<float, uint32_t{3u}> vecToCenter{ 
                 coord[0] - sphereCenter[0],
                 coord[1] - sphereCenter[1],
                 coord[2] - sphereCenter[2],
             };
-            //maxLen = linAlg::maximum(maxLen, linAlg::dot(vecToCenter, vecToCenter));
+
             maxLen = std::max( maxLen, dot<float, uint32_t{3u}>( vecToCenter, vecToCenter ) );
-            //maxLen = std::max( maxLen, vecToCenter[0] * vecToCenter[0] + vecToCenter[1] * vecToCenter[1] + vecToCenter[2] * vecToCenter[2] );
         }
     }
     mCenterAndRadius[3] = sqrtf(maxLen);
     mWasRadiusCalculated = true;
 
     centerAndRadius = mCenterAndRadius;
-
 }
