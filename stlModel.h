@@ -21,12 +21,12 @@ namespace FileLoader {
 
         const std::vector<float>& coords() const        { return mCoords; }
         const std::vector<float>& normals() const       { return mNormals; }
-        const std::vector<uint32_t>& indices() const { return mTriangleVertexIndices; }
+        const std::vector<uint32_t>& indices() const    { return mIndices; }
 
     private:
         std::vector<float>                                  mCoords;
         std::vector<float>                                  mNormals;
-        std::vector<uint32_t>                               mTriangleVertexIndices;
+        std::vector<uint32_t>                               mIndices;
         std::vector<uint32_t>                               mSolids;
 
         mutable std::array<float, 4>                        mCenterAndRadius;

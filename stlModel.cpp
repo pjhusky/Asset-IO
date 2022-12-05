@@ -24,7 +24,7 @@ namespace {
 void StlModel::clear() {
     mCoords.clear();
     mNormals.clear();
-    mTriangleVertexIndices.clear();
+    mIndices.clear();
     mSolids.clear();
 
     mCenterAndRadius = std::array<float, 4>{ 0.0f, 0.0f, 0.0f, 0.0f };
@@ -35,7 +35,7 @@ eRetVal StlModel::load(const std::string& url)
 {
     std::vector<float> faceNormals;
     try {
-        stl_reader::ReadStlFile(url.c_str(), mCoords, faceNormals, mTriangleVertexIndices, mSolids);
+        stl_reader::ReadStlFile(url.c_str(), mCoords, faceNormals, mIndices, mSolids);
     }
     catch (std::exception& e) {
         std::cout << e.what() << std::endl;
@@ -44,7 +44,8 @@ eRetVal StlModel::load(const std::string& url)
     mCenterAndRadius = std::array<float, 4>{ 0.0f, 0.0f, 0.0f, 0.0f };
     mWasRadiusCalculated = false;
 
-    mNormals.resize( faceNormals.size() * sizeof( faceNormals[0] ) * 3 );
+    // distribute face normals to vertices, assume triangles only
+    mNormals.resize( faceNormals.size() * 3 );
     size_t idx = 0;
     for (const auto& faceNormalCoord : faceNormals) {
         mNormals[ ( idx + 0 ) * 3 ] = faceNormalCoord;
@@ -70,11 +71,11 @@ const void StlModel::getBoundingSphere(std::array<float, 4>& centerAndRadius) co
         return;
     }
 
-    const size_t numTris = mTriangleVertexIndices.size() / 3;
+    const size_t numTris = mIndices.size() / 3;
     for (size_t itri = 0; itri < numTris; ++itri) {
         //std::cout << "coordinates of triangle " << itri << ": ";
         for (size_t icorner = 0; icorner < 3; ++icorner) {
-            const float* const c = &mCoords[3 * mTriangleVertexIndices[3 * itri + icorner]];
+            const float* const c = &mCoords[3 * mIndices[3 * itri + icorner]];
             //std::cout << "(" << c[0] << ", " << c[1] << ", " << c[2] << ") ";
             mCenterAndRadius[0] += c[0];
             mCenterAndRadius[1] += c[1];
@@ -82,7 +83,7 @@ const void StlModel::getBoundingSphere(std::array<float, 4>& centerAndRadius) co
         }
     }
 
-    const float fNumCoords = static_cast<float>(mTriangleVertexIndices.size());
+    const float fNumCoords = static_cast<float>(mIndices.size());
     mCenterAndRadius[0] /= fNumCoords;
     mCenterAndRadius[1] /= fNumCoords;
     mCenterAndRadius[2] /= fNumCoords;
@@ -91,7 +92,7 @@ const void StlModel::getBoundingSphere(std::array<float, 4>& centerAndRadius) co
 
     for (size_t itri = 0; itri < numTris; ++itri) {
         for (size_t icorner = 0; icorner < 3; ++icorner) {
-            const float *const c = &mCoords[3 * mTriangleVertexIndices[3 * itri + icorner]];
+            const float *const c = &mCoords[3 * mIndices[3 * itri + icorner]];
             std::array<float, uint32_t{3u}> coord{ c[0], c[1], c[2] };
 
             std::array<float, uint32_t{3u}> vecToCenter{ 
