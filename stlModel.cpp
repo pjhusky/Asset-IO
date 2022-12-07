@@ -53,7 +53,42 @@ eRetVal StlModel::load(const std::string& url)
         mNormals[ ( idx + 2 ) * 3 ] = faceNormalCoord;
         idx++;
     }
-    
+
+    std::fill( mNormals.begin(), mNormals.end(), 0.0f );
+    for (size_t faceIdx = 0, lastIdx = mIndices.size() / 3; faceIdx < lastIdx; faceIdx++) {
+        const uint32_t v0_idx = mIndices[faceIdx * 3 + 0];
+        const uint32_t v1_idx = mIndices[faceIdx * 3 + 1];
+        const uint32_t v2_idx = mIndices[faceIdx * 3 + 2];
+
+        //const float v0_x = mCoords[ v0_idx * 3 + 0 ];
+        //const float v0_y = mCoords[ v0_idx * 3 + 1 ];
+        //const float v0_z = mCoords[ v0_idx * 3 + 2 ];
+
+        //const float v1_x = mCoords[ v1_idx * 3 + 0 ];
+        //const float v1_y = mCoords[ v1_idx * 3 + 1 ];
+        //const float v1_z = mCoords[ v1_idx * 3 + 2 ];
+
+        //const float v2_x = mCoords[ v2_idx * 3 + 0 ];
+        //const float v2_y = mCoords[ v2_idx * 3 + 1 ];
+        //const float v2_z = mCoords[ v2_idx * 3 + 2 ];
+
+        const float faceNormal_x = faceNormals[ faceIdx * 3 + 0 ];
+        const float faceNormal_y = faceNormals[ faceIdx * 3 + 1 ];
+        const float faceNormal_z = faceNormals[ faceIdx * 3 + 2 ];
+
+        mNormals[v0_idx * 3 + 0] = 0.5f * ( mNormals[v0_idx * 3 + 0] + faceNormal_x );
+        mNormals[v0_idx * 3 + 1] = 0.5f * ( mNormals[v0_idx * 3 + 1] + faceNormal_y );
+        mNormals[v0_idx * 3 + 2] = 0.5f * ( mNormals[v0_idx * 3 + 2] + faceNormal_z );
+
+        mNormals[v1_idx * 3 + 0] = 0.5f * ( mNormals[v1_idx * 3 + 0] + faceNormal_x );
+        mNormals[v1_idx * 3 + 1] = 0.5f * ( mNormals[v1_idx * 3 + 1] + faceNormal_y );
+        mNormals[v1_idx * 3 + 2] = 0.5f * ( mNormals[v1_idx * 3 + 2] + faceNormal_z );
+
+        mNormals[v2_idx * 3 + 0] = 0.5f * ( mNormals[v2_idx * 3 + 0] + faceNormal_x );
+        mNormals[v2_idx * 3 + 1] = 0.5f * ( mNormals[v2_idx * 3 + 1] + faceNormal_y );
+        mNormals[v2_idx * 3 + 2] = 0.5f * ( mNormals[v2_idx * 3 + 2] + faceNormal_z );
+    }
+
     getBoundingSphere(mCenterAndRadius);
     
     return eRetVal::OK;//();
