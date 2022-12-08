@@ -248,8 +248,11 @@ namespace FileLoader {
 
             fileStream.close();
 
-            FILE* pFile = fopen( filePath.c_str(), "rb" );
-            if (fseek( pFile, -sizeof( float ) * data.size(), SEEK_END ) != 0) { return eRetVal::ERROR; }
+            //FILE* pFile = fopen( filePath.c_str(), "rb" );
+            FILE* pFile = nullptr;
+            fopen_s( &pFile, filePath.c_str(), "rb" );
+
+            if (fseek( pFile, -static_cast<long>( sizeof( float ) * data.size() ), SEEK_END ) != 0) { return eRetVal::ERROR; }
             fread( data.data(), sizeof( float ), data.size(), pFile );
             fclose( pFile );
 
@@ -278,7 +281,10 @@ namespace FileLoader {
             const std::string& comment = "" ) {
 
             // ### ASCII header ###
-            FILE* fileFP = fopen( filePath.c_str(), "w" ); // write image to file
+            //FILE* fileFP = fopen( filePath.c_str(), "w" ); // write image to file
+            FILE* fileFP = nullptr;
+            fopen_s( &fileFP, filePath.c_str(), "w" );
+
             //fprintf(fileFP, "PF # spp = %d\n", spp);
             fprintf( fileFP, "%s\n", (colorMode == ePfmColorMode::rgb) ? "PF" : "Pf" );
             fprintf( fileFP, "%d %d\n", dimX, dimY );
@@ -288,7 +294,9 @@ namespace FileLoader {
             fclose( fileFP );
 
             // ### binary data ###
-            fileFP = fopen( filePath.c_str(), "ab" );
+            //fileFP = fopen( filePath.c_str(), "ab" );
+            fopen_s( &fileFP, filePath.c_str(), "ab" );
+
             fseek( fileFP, 0, SEEK_END );
 
             const int32_t numDstChannels = (colorMode == ePfmColorMode::rgb) ? 3 : 1;
