@@ -8,6 +8,8 @@
 #endif
 #include <math.h>
 
+#include <assert.h>
+
 using namespace FileLoader;
 
 namespace {
@@ -43,14 +45,16 @@ eRetVal StlModel::load(const std::string& url)
 
     mCenterAndRadius = std::array<float, 4>{ 0.0f, 0.0f, 0.0f, 0.0f };
     mWasRadiusCalculated = false;
+    
+    assert( faceNormals.size() % 3 == 0 && "assume there is always a coord-triple xyz in each face normal" );
 
     // distribute face normals to vertices, assume triangles only
     mNormals.resize( faceNormals.size() * 3 );
     size_t idx = 0;
     for (const auto& faceNormalCoord : faceNormals) {
-        mNormals[ ( idx + 0 ) * 3 ] = faceNormalCoord;
-        mNormals[ ( idx + 1 ) * 3 ] = faceNormalCoord;
-        mNormals[ ( idx + 2 ) * 3 ] = faceNormalCoord;
+        mNormals[ idx * 3 + 0 ] = faceNormalCoord;
+        mNormals[ idx * 3 + 1 ] = faceNormalCoord;
+        mNormals[ idx * 3 + 2 ] = faceNormalCoord;
         idx++;
     }
 
