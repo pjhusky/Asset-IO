@@ -50,13 +50,6 @@ eRetVal StlModel::load(const std::string& url)
 
     // distribute face normals to vertices, assume triangles only
     mNormals.resize( faceNormals.size() * 3 );
-    size_t idx = 0;
-    for (const auto& faceNormalCoord : faceNormals) {
-        mNormals[ idx * 3 + 0 ] = faceNormalCoord;
-        mNormals[ idx * 3 + 1 ] = faceNormalCoord;
-        mNormals[ idx * 3 + 2 ] = faceNormalCoord;
-        idx++;
-    }
 
     std::fill( mNormals.begin(), mNormals.end(), 0.0f );
     for (size_t faceIdx = 0, lastIdx = mIndices.size() / 3; faceIdx < lastIdx; faceIdx++) {
