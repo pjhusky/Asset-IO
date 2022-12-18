@@ -354,8 +354,7 @@ end_header)";
     //fopenErr = 
     fopen_s( &pBinaryFile, url.c_str(), "rb" );
 
-    //int32_t seekResult = fseeko( pBinaryFile, charactersReadFromFile.size() + 1, SEEK_SET ); // +1 for newline
-    int32_t seekResult = fseek( pBinaryFile, charactersReadFromFile.size() + 1, SEEK_SET ); // +1 for newline
+    int32_t seekResult = fseek( pBinaryFile, static_cast<long>(charactersReadFromFile.size() + 1), SEEK_SET ); // +1 for newline
 
     size_t blockIdx = -1;
     for ( auto& elementBlockDescription : mElementBlockDescriptions ) {
@@ -639,7 +638,7 @@ eRetVal PlyModel::save( const std::string& url, const std::string& comment ) {
     
     // now for the actual data (binary litte-endian mode)
     fopen_s( &pFile, filepath.c_str(), "ab" );
-    int fseekRet = fseek( pFile, headerByteLen, SEEK_SET );
+    int fseekRet = fseek( pFile, static_cast<long>(headerByteLen), SEEK_SET );
     for ( const auto& elementBlockDescription : mElementBlockDescriptions ) {
         const auto& blockData = elementBlockDescription.elementBlockData;
         for ( size_t vertAttrIdx = 0; vertAttrIdx < blockData.numProperties; vertAttrIdx++ ) {
