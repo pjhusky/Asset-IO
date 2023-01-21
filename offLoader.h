@@ -178,7 +178,7 @@ struct Mesh {
                 size_t vertColorIdxNum = 0;
                 while ( std::regex_search( matchString, indexMatch, intRegex ) ) {
                     //printf( "%d ", strToNum< int >( indexMatch[ 1 ] ) );
-                    triangleFaceIndices[ vertColorIdxNum ] = strToNum< float >( indexMatch[ 1 ] );
+                    triangleFaceIndices[ vertColorIdxNum ] = strToNum< int32_t >( indexMatch[ 1 ] );
 
                     matchString = indexMatch.suffix();
 
@@ -219,7 +219,7 @@ struct Mesh {
             const auto length = sqrt( normal[ 0 ] * normal[ 0 ] + normal[ 1 ] * normal[ 1 ] + normal[ 2 ] * normal[ 2 ] );
             area += length;
         }
-        return area * 0.5;
+        return static_cast<float>(area * 0.5f);
     }
 
 #if 1
@@ -231,7 +231,7 @@ struct Mesh {
             centerPos[ 1 ] += vertexPos[ 1 ];
             centerPos[ 2 ] += vertexPos[ 2 ];
         }
-        const double numVerts = mVertexPositions.size();
+        const double numVerts = static_cast<double>(mVertexPositions.size());
         centerPos[ 0 ] /= numVerts;
         centerPos[ 1 ] /= numVerts;
         centerPos[ 2 ] /= numVerts;
