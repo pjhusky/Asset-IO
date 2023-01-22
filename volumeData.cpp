@@ -10,6 +10,7 @@
     #define _USE_MATH_DEFINES
 #endif
 #include <math.h>
+#include <atomic>
 
 using namespace FileLoader;
 
@@ -77,6 +78,28 @@ void VolumeData::calculateNormals() {
                 //mDensities[z * mDim[1] * mDim[0] + y * mDim[0] + x] = 1.0f;
             }
         }
+    }
+}
+
+void FileLoader::VolumeData::calculateHistogramBuckets() {
+    const uint32_t numVoxels = mDim[0] * mDim[1] * mDim[2];
+    std::array< std::atomic<uint32_t>, mNumHistogramBuckets > mHistogramBucketsAtomic;
+
+#pragma omp parallel for schedule(dynamic, 1)		// OpenMP 
+    for ( int64_t i = 0; i < mNumHistogramBuckets; i++ ) {
+        mHistogramBucketsAtomic[ i ].store(0u);
+    }
+
+#pragma omp parallel for schedule(dynamic, 1)		// OpenMP 
+    for ( int64_t i = 0; i < numVoxels; i++ ) {
+        const auto density = mDensities[ i ];
+        const auto bucketIdx = density / mHistogramDensitiesPerBucket;
+        mHistogramBucketsAtomic[ bucketIdx ]++;
+    }
+
+#pragma omp parallel for schedule(dynamic, 1)		// OpenMP 
+    for ( int64_t i = 0; i < mNumHistogramBuckets; i++ ) {
+        mHistogramBuckets[ i ] = mHistogramBucketsAtomic[ i ];
     }
 }
 

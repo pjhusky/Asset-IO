@@ -22,6 +22,7 @@ namespace FileLoader{
         eRetVal load( const std::string& fileUrl );
         
         void calculateNormals();
+        void calculateHistogramBuckets();
         
         void getBoundingSphere( vec4_t& boundingSphere );
         u16vec3_t getDim() const { return mDim; }
@@ -34,11 +35,17 @@ namespace FileLoader{
 
         const u16vec2_t& getMinMaxDensity() const { return mMinMaxDensity; }
 
+        static constexpr uint32_t   mNumHistogramBuckets = 1024;
+        static constexpr uint32_t   mHistogramDensitiesPerBucket = 4096 / mNumHistogramBuckets;
+        const std::array< uint32_t, mNumHistogramBuckets >& getHistoBuckets() const { return mHistogramBuckets; }
+
     private:
         u16vec3_t                   mDim;
         std::vector< uint16_t >     mDensities;
         std::vector< vec3_t >       mNormals; // calculate with wide kernel (~Sobel)
         std::array< uint16_t, 2 >   mMinMaxDensity;
+        
+        std::array< uint32_t, mNumHistogramBuckets > mHistogramBuckets;
     };
 }
 #endif // _VOLUMEDATA_H_EA89F308_240F_4AE0_97B5_AFE55000B453
