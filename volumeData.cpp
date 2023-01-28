@@ -30,12 +30,14 @@ eRetVal VolumeData::load( const std::string& fileUrl ) {
 
     size_t elementsRead = 0;
     elementsRead = fread( mDim.data(), sizeof( uint16_t ), 3, pFile );
+    assert( elementsRead == 3 );
 
     printf( "dimensions: %u x %u x %u \n", (uint32_t)mDim[0], (uint32_t)mDim[1], (uint32_t)mDim[2] );
 
     const uint32_t numVoxels = mDim[0] * mDim[1] * mDim[2];
     mDensities.resize( numVoxels );
-    fread( mDensities.data(), sizeof( uint16_t ), numVoxels, pFile );
+    elementsRead = fread( mDensities.data(), sizeof( uint16_t ), numVoxels, pFile );
+    assert( elementsRead == numVoxels );
 
     // from https://www.cg.tuwien.ac.at/research/vis/datasets/
     // The data range is [0,4095].
