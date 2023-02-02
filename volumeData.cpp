@@ -105,8 +105,6 @@ void FileLoader::VolumeData::calculateHistogramBuckets() {
     }
 }
 
-
-
 void VolumeData::getBoundingSphere( vec4_t& boundingSphere ) {
     const float hx = mDim[0] * 0.5f;
     const float hy = mDim[1] * 0.5f;

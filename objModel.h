@@ -38,5 +38,4 @@ namespace FileLoader
 
         boundingSphere_t        m_boundingSphere; // center.xyz, radius.w
     };
-
 } 

@@ -15,7 +15,6 @@ namespace FileLoader{
         
         using u16vec2_t = std::array<uint16_t, 2>;
         using u16vec3_t = std::array<uint16_t, 3>;
-        //using vec2_t = std::array<float, 2>;
         using vec3_t = std::array<float, 3>;
         using vec4_t = std::array<float, 4>;
 
@@ -42,7 +41,7 @@ namespace FileLoader{
     private:
         u16vec3_t                   mDim;
         std::vector< uint16_t >     mDensities;
-        std::vector< vec3_t >       mNormals; // calculate with wide kernel (~Sobel)
+        std::vector< vec3_t >       mNormals;
         std::array< uint16_t, 2 >   mMinMaxDensity;
         
         std::array< uint32_t, mNumHistogramBuckets > mHistogramBuckets;

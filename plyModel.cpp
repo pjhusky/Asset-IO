@@ -241,7 +241,6 @@ end_header)";
             std::regex elementHeaderRegex{ elementHeaderPattern };
             std::smatch elementHeaderSubMatches;
             std::regex_search( elementBlockStr, elementHeaderSubMatches, elementHeaderRegex );
-            //for ( const auto& elementHeaderSubMatch : elementHeaderSubMatches )
             for ( auto elementHeaderSubMatchIter = elementHeaderSubMatches.begin() + 1; 
                        elementHeaderSubMatchIter != elementHeaderSubMatches.end();
                      ++elementHeaderSubMatchIter )
@@ -284,7 +283,7 @@ end_header)";
                 elementBlockEntry.propertyDescriptions.push_back( propertyDesc );
             }
 
-            // somehow merge this "special case" into the "normal", i.e., non-list, property handling in the loop above 
+            // TODO: merge this "special case" into the "normal", i.e., non-list, property handling in the loop above 
             std::regex propertyListRegex{ propertyListNoTypeCapturePattern };
             for ( auto propertiesIter = std::sregex_iterator( propertyBlock.begin(), propertyBlock.end(), propertyListRegex );
                 propertiesIter != std::sregex_iterator();
@@ -349,7 +348,6 @@ end_header)";
     }
 
     // now read actual data from file according to data layout given in the header
-    //FILE* pBinaryFile = fopen( url.c_str(), "rb" );
     FILE* pBinaryFile; 
     //fopenErr = 
     fopen_s( &pBinaryFile, url.c_str(), "rb" );
@@ -598,7 +596,6 @@ const void PlyModel::getBoundingSphere( std::array<float, 4>& centerAndRadius ) 
 eRetVal PlyModel::save( const std::string& url, const std::string& comment ) {
 
     FILE* pFile = nullptr;
-    //std::string filepath = url + ".okay.ply";
     std::string filepath = url;
     fopen_s( &pFile, filepath.c_str(), "w" );
 
@@ -610,8 +607,6 @@ eRetVal PlyModel::save( const std::string& url, const std::string& comment ) {
         numCharsWritten += fprintf( pFile, "ply\n" );
         numCharsWritten += fprintf( pFile, "format binary_little_endian 1.0\n" );
         numCharsWritten += fprintf( pFile, "comment %s\n", comment.c_str() );
-        //numCharsWritten += fprintf( pFile, "comment not-so-awesome homebrew ply file saving\n" );
-        //numCharsWritten += fprintf( pFile, "comment VCGLIB generated\n" ); // for easier comparison with original data file
 
         for ( const auto& elementBlockDescription : mElementBlockDescriptions ) {
             const auto& blockData = elementBlockDescription.elementBlockData;
@@ -627,10 +622,7 @@ eRetVal PlyModel::save( const std::string& url, const std::string& comment ) {
             }
         }
         numCharsWritten += fprintf( pFile, "end_header\n" );
-        //fprintf( pFile, "end_header" ); // no newline for binary encoding
         fflush( pFile );
-        //headerByteLen = ftell( pFile );
-        //assert( headerByteLen == numCharsWritten );
         fclose( pFile );
 
 		headerByteLen = numCharsWritten;

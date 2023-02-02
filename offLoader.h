@@ -87,7 +87,6 @@ struct Mesh {
             //std::cout << "headerVsDataMatch = " << headerVsDataMatch.str() << std::endl;
             size_t i = 0;
             for ( const auto& match: headerVsDataMatch ) {
-                //if ( i > 0 && i < headerVsDataMatch.size() - 1 ) { std::cout << "headerVsDataMatch " << i << " = " << match.str() << std::endl; }
                 if ( i == 1 ) { // 1st sub match
                     mVertexPositions.resize( strToNum< size_t >( match.str() ) );
                     //std::cout << "\tnumVertices = " << mVertexPositions.size() << std::endl;

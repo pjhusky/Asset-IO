@@ -92,7 +92,6 @@ namespace FileLoader {
 
                 fseek( pFile, -imgByteSize, SEEK_END );
                 pData.resize( imgNumEntries );
-                //fread( pData.data(), imgNumEntries, sizeof( val_T ), pFile );
                 for (int32_t y = dimY - 1; y >= 0; y--) {
                     fread( pData.data() + y * dimX * numSrcChannels, dimX * numSrcChannels, sizeof( val_T ), pFile );
                 }
@@ -122,7 +121,6 @@ namespace FileLoader {
                 std::smatch& rgbTripleMatch = imgSizeAndMaxValMatches;
                 pData.reserve( imgNumEntries );
                 while (std::regex_search( contentString, rgbTripleMatch, rgbTripleRegex )) {
-                    //while ( std::regex_search( rgbTripleMatch.suffix().str(), rgbTripleMatch, rgbTripleRegex ) ) {
                     assert( rgbTripleMatch.size() == 4 ); // first match is the whole thing
                     for (size_t c = 1; c <= 3; c++) {
                         //printf( "%s ", rgbTripleMatch[ c ].str().c_str() );
@@ -139,7 +137,6 @@ namespace FileLoader {
                 pData.resize( imgNumEntries );
                 for (int32_t y = dimY - 1; y >= 0; y--) {
                     for (int32_t x = 0; x < dimX; x++) {
-                        //for ( int32_t c = 0; c < numSrcChannels; c++ ) {
                         assert( std::regex_search( contentString, rgbTripleMatch, rgbTripleRegex ) && rgbTripleMatch.size() == 4 );
                         for (size_t c = 1; c <= 3; c++) {
                             pData[(y * dimX + x) * numSrcChannels + c] = stringUtils::convStrTo< val_T >( rgbTripleMatch[c] );
@@ -171,14 +168,11 @@ namespace FileLoader {
             if (storeBinary) {
                 fclose( pFile );
                 pFile = fopen( filePath.c_str(), "ab" );
-
-                //for (int32_t y = dimY - 1; y >= 0; y--) { // write line-by-line, flipping the y coord
                 for (int32_t y = 0; y < dimY; y++) {
                     fwrite( pData + y * dimX * numSrcChannels, sizeof( uint8_t ) * numSrcChannels, dimX, pFile );
                 }
             }
             else {
-                //for (int32_t y = dimY - 1; y >= 0; y--) {
                 for (int32_t y = 0; y < dimY; y++) {
                     for (int32_t x = 0; x < dimX; x++) {
                         int32_t i = (x + y * dimX) * numSrcChannels;
@@ -281,20 +275,15 @@ namespace FileLoader {
             const std::string& comment = "" ) {
 
             // ### ASCII header ###
-            //FILE* fileFP = fopen( filePath.c_str(), "w" ); // write image to file
             FILE* fileFP = nullptr;
             fopen_s( &fileFP, filePath.c_str(), "w" );
 
-            //fprintf(fileFP, "PF # spp = %d\n", spp);
             fprintf( fileFP, "%s\n", (colorMode == ePfmColorMode::rgb) ? "PF" : "Pf" );
             fprintf( fileFP, "%d %d\n", dimX, dimY );
-            //fprintf(fileFP, "-1 # rendering time: %f s\n", duration);
             fprintf( fileFP, "-1.0\n" ); // negative means little endian, absolute value denotes scale of values
-            //fprintf( fileFP, "%f\n", -abs( scale ) ); // make sure it's little endian
             fclose( fileFP );
 
             // ### binary data ###
-            //fileFP = fopen( filePath.c_str(), "ab" );
             fopen_s( &fileFP, filePath.c_str(), "ab" );
 
             fseek( fileFP, 0, SEEK_END );
