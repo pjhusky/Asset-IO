@@ -24,15 +24,15 @@ namespace FileLoader{
         void calculateHistogramBuckets();
         
         void getBoundingSphere( vec4_t& boundingSphere );
-        u16vec3_t getDim() const { return mDim; }
+        inline u16vec3_t getDim() const { return mDim; }
 
-        std::vector< uint16_t >& getDensities() { return mDensities; }
-        const std::vector< uint16_t >& getDensities() const { return mDensities; }
+        inline std::vector< uint16_t >& getDensities() { return mDensities; }
+        inline const std::vector< uint16_t >& getDensities() const { return mDensities; }
 
-        std::vector< vec3_t >& getNormals() { return mNormals; }
-        const std::vector< vec3_t >& getNormals() const { return mNormals; }
+        inline std::vector< vec3_t >& getNormals() { return mNormals; }
+        inline const std::vector< vec3_t >& getNormals() const { return mNormals; }
 
-        const u16vec2_t& getMinMaxDensity() const { return mMinMaxDensity; }
+        inline const u16vec2_t& getMinMaxDensity() const { return mMinMaxDensity; }
 
         static constexpr uint32_t   mNumHistogramBuckets = 1024;
         static constexpr uint32_t   mHistogramDensitiesPerBucket = 4096 / mNumHistogramBuckets;
