@@ -6,10 +6,14 @@
 #include <limits.h>
 #include <omp.h>
 
-#ifndef _USE_MATH_DEFINES
-    #define _USE_MATH_DEFINES
-#endif
-#include <math.h>
+//#ifndef _USE_MATH_DEFINES
+//    #define _USE_MATH_DEFINES
+//#endif
+//#include <math.h>
+
+#include <algorithm>
+//#include <iostream>
+
 #include <atomic>
 
 using namespace FileLoader;
@@ -61,7 +65,7 @@ eRetVal VolumeData::load( const std::string& fileUrl ) {
     //mMinMaxDensity[0] = 0;
     //mMinMaxDensity[1] = 4095;
 
-#if 0 // TODO!!!
+#if 1 // TODO!!!
     mNormals.resize( numVoxels );
     calculateNormals();
 #endif
@@ -72,10 +76,35 @@ eRetVal VolumeData::load( const std::string& fileUrl ) {
 void VolumeData::calculateNormals() {
 #pragma omp parallel for schedule(dynamic, 1)		// OpenMP 
     for (int32_t z = 0; z < mDim[2]; z++) { // error C3016: 'z': index variable in OpenMP 'for' statement must have signed integral type
-        for (uint32_t y = 0; y < mDim[1]; y++) {
-            for (uint32_t x = 0; x < mDim[0]; x++) {
+        for (int32_t y = 0; y < mDim[1]; y++) {
+            for (int32_t x = 0; x < mDim[0]; x++) {
                 // TODO!!!
-                mNormals[z * mDim[1] * mDim[0] + y * mDim[0] + x] = vec3_t{ 0.0f, 1.0f, 0.0f };
+                //mNormals[z * mDim[1] * mDim[0] + y * mDim[0] + x] = vec3_t{ 0.0f, 1.0f, 0.0f };
+
+                const int32_t mx = std::max( 0, x - 1 );
+                const int32_t px = std::min( mDim[0] - 1, x + 1 );
+
+                const int32_t my = std::max( 0, y - 1 );
+                const int32_t py = std::min( mDim[1] - 1, y + 1 );
+
+                const int32_t mz = std::max( 0, z - 1 );
+                const int32_t pz = std::min( mDim[2] - 1, z + 1 );
+
+                const uint32_t addr_mx = (  z * mDim[1] + y  ) * mDim[0] + mx;
+                const uint32_t addr_px = (  z * mDim[1] + y  ) * mDim[0] + px;
+
+                const uint32_t addr_my = (  z * mDim[1] + my ) * mDim[0] + x;
+                const uint32_t addr_py = (  z * mDim[1] + py ) * mDim[0] + x;
+
+                const uint32_t addr_mz = ( mz * mDim[1] + y )  * mDim[0] + x;
+                const uint32_t addr_pz = ( pz * mDim[1] + y )  * mDim[0] + x;
+
+                const uint32_t addr_center = z * mDim[1] * mDim[0] + y * mDim[0] + x;
+
+                mNormals[ addr_center ][0] = (mDensities[addr_px] - mDensities[addr_mx]) * 0.5f;
+                mNormals[ addr_center ][1] = (mDensities[addr_py] - mDensities[addr_my]) * 0.5f;
+                mNormals[ addr_center ][2] = (mDensities[addr_pz] - mDensities[addr_mz]) * 0.5f;
+
                 //mDensities[z * mDim[1] * mDim[0] + y * mDim[1] + x] = 15000;
                 //mDensities[z * mDim[1] * mDim[0] + y * mDim[0] + x] = 1.0f;
             }
