@@ -18,9 +18,15 @@ namespace FileLoader{
         using vec3_t = std::array<float, 3>;
         using vec4_t = std::array<float, 4>;
 
-        eRetVal load( const std::string& fileUrl );
+        enum class gradientMode_t {
+            CENTRAL_DIFFERENCES = 0,
+            SOBEL_3D            = 1,
+        };
+
+        eRetVal load( const std::string& fileUrl, const gradientMode_t mode );
         
-        void calculateNormals();
+        void calculateNormals( const gradientMode_t mode );
+        gradientMode_t getGradientMode() const { return mGradientMode; }
         void calculateHistogramBuckets();
         
         void getBoundingSphere( vec4_t& boundingSphere );
@@ -51,6 +57,7 @@ namespace FileLoader{
         std::vector< uint16_t >     mDensities;
         std::vector< vec3_t >       mNormals;
         std::array< uint16_t, 2 >   mMinMaxDensity;
+        gradientMode_t              mGradientMode = gradientMode_t::SOBEL_3D;
         
         std::array< uint32_t, mNumHistogramBuckets > mHistogramBuckets;
     };
