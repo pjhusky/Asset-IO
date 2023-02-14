@@ -34,6 +34,14 @@ namespace FileLoader{
 
         inline const u16vec2_t& getMinMaxDensity() const { return mMinMaxDensity; }
 
+        inline int32_t xClamp( const int32_t x ) { return std::min( std::max( x, 0 ), mDim[0] - 1 ); }
+        inline int32_t yClamp( const int32_t y ) { return std::min( std::max( y, 0 ), mDim[1] - 1 ); }
+        inline int32_t zClamp( const int32_t z ) { return std::min( std::max( z, 0 ), mDim[2] - 1 ); }
+        inline int32_t dimClamp( const int32_t coord, const int32_t dimIdx ) { return std::min( std::max( coord, 0 ), mDim[dimIdx] - 1 ); }
+
+        inline uint32_t calcAddr( const int32_t x, const int32_t y, const int32_t z ) { return (z * mDim[1] + y)* mDim[0] + x; }
+        inline uint32_t calcAddrClamped( const int32_t x, const int32_t y, const int32_t z ) { return (zClamp(z) * mDim[1] + yClamp(y))* mDim[0] + xClamp(x); }
+
         static constexpr uint32_t   mNumHistogramBuckets = 1024;
         static constexpr uint32_t   mHistogramDensitiesPerBucket = 4096 / mNumHistogramBuckets;
         const std::array< uint32_t, mNumHistogramBuckets >& getHistoBuckets() const { return mHistogramBuckets; }
