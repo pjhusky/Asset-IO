@@ -130,22 +130,17 @@ void VolumeData::calculateNormals( const gradientMode_t mode ) {
                         const int32_t conv_y = y;
                         const int32_t conv_z = z;
                         uint32_t kernelIdx = 0;
-                        //float kernel_sum_x = 0.0f;
-                        //float tmp_sum_x = 0.0f;
                         int32_t cx = 0;
 
                         for (int32_t cz = -1; cz <= 1; cz++) {
                             for (int32_t cy = -1; cy <= 1; cy++) {
                                 const uint32_t conv_addr = calcAddrClamped( conv_x + cx, conv_y + cy, conv_z + cz );
                                 sum_x += mDensities[conv_addr] * sobel_x[off_x + 1][kernelIdx];
-                                kernel_sum_x += fabs( sobel_x[off_x + 1][kernelIdx] );
+                                kernel_sum_x += fabsf( sobel_x[off_x + 1][kernelIdx] );
                                 kernelIdx++;
                             }
                         }
-                        //sum_x += tmp_sum_x / std::max<float>(fabs( kernel_sum_x ), 1.0f);
                     }
-                    //sum_x /= fabs( std::max(kernel_sum_x, 1.0f) );
-                    //sum_x /= 3.0f;
                     sum_x /= kernel_sum_x;
 
                     float sum_y = 0.0f;
@@ -155,21 +150,16 @@ void VolumeData::calculateNormals( const gradientMode_t mode ) {
                         const int32_t conv_y = yClamp( y + off_y );
                         const int32_t conv_z = z;
                         uint32_t kernelIdx = 0;
-                        //float kernel_sum_y = 0.0f;
-                        //float tmp_sum_y = 0.0f;
                         int32_t cy = 0;
                         for (int32_t cz = -1; cz <= 1; cz++) {
                             for (int32_t cx = -1; cx <= 1; cx++) {
                                 const uint32_t conv_addr = calcAddrClamped( conv_x + cx, conv_y + cy, conv_z + cz );
                                 sum_y += mDensities[conv_addr] * sobel_y[off_y + 1][kernelIdx];
-                                kernel_sum_y += fabs( sobel_y[off_y + 1][kernelIdx] );
+                                kernel_sum_y += fabsf( sobel_y[off_y + 1][kernelIdx] );
                                 kernelIdx++;
                             }
                         }
-                        //sum_y += tmp_sum_y / std::max<float>( fabs( kernel_sum_y ), 1.0f );
                     }
-                    //sum_y /= std::max<float>( fabs( kernel_sum_y ), 1.0f);
-                    //sum_y /= 3.0f;
                     sum_y /= kernel_sum_y;
 
                     float sum_z = 0.0f;
@@ -179,23 +169,16 @@ void VolumeData::calculateNormals( const gradientMode_t mode ) {
                         const int32_t conv_y = y;
                         const int32_t conv_z = zClamp( z + off_z );
                         uint32_t kernelIdx = 0;
-                        //float kernel_sum_z = 0.0f;
-                        //float tmp_sum_z = 0.0f;
                         int32_t cz = 0;
-
                         for (int32_t cy = -1; cy <= 1; cy++) {
                             for (int32_t cx = -1; cx <= 1; cx++) {
                                 const uint32_t conv_addr = calcAddrClamped( conv_x + cx, conv_y + cy, conv_z + cz );
                                 sum_z += mDensities[conv_addr] * sobel_z[off_z + 1][kernelIdx];
-                                kernel_sum_z += fabs( sobel_z[off_z + 1][kernelIdx] );
+                                kernel_sum_z += fabsf( sobel_z[off_z + 1][kernelIdx] );
                                 kernelIdx++;
                             }
                         }
-
-                        //sum_z += tmp_sum_z / std::max<float>(fabs(kernel_sum_z), 1.0f);
                     }
-                    //sum_z /= std::max<float>(fabs(kernel_sum_z), 1.0f);
-                    //sum_z /= 3.0f;
                     sum_z /= kernel_sum_z;
 
                     const uint32_t addr_center = (z * mDim[1] + y) * mDim[0] + x;
