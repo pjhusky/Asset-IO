@@ -152,7 +152,7 @@ void VolumeData::sobelGradients() {
         }
     }
 
-#pragma omp parallel for schedule(dynamic, 1) // OpenMP 
+#pragma omp parallel for /*collapse(3)*/ schedule(dynamic, 1) // OpenMP 
     for (int32_t z = 0; z < mDim[2]; z++) { //convolve 
         for (int32_t y = 0; y < mDim[1]; y++) {
             for (int32_t x = 0; x < mDim[0]; x++) {
@@ -291,7 +291,7 @@ void VolumeData::sobelGradients() {
 }
 
 void VolumeData::centralDifferencesGradients() {
-#pragma omp parallel for schedule(dynamic, 1) // OpenMP
+#pragma omp parallel for /*collapse(3)*/ schedule(dynamic, 1) // OpenMP
     for (int32_t z = 0; z < mDim[2]; z++) { // error C3016: 'z': index variable in OpenMP 'for' statement must have signed integral type
         for (int32_t y = 0; y < mDim[1]; y++) {
             for (int32_t x = 0; x < mDim[0]; x++) {
